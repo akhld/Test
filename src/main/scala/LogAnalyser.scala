@@ -71,10 +71,86 @@ object LogAnalyser {
     val dyno_rdd = sqlContext.sql("SELECT count(log_dyno) c, log_dyno FROM logs_table group by log_dyno order by c desc")
 
     //Now lets get those results in console!
-    total_rdd.map(t => "\n\n\n\nTotal Number of log lines : " + (t(0).toString.toInt - 1)).take(1).foreach(println)
+    total_rdd.map(t => "\nOverview\n========\n\n\nTotal Number of log lines : " + (t(0).toString.toInt - 1)).take(1).foreach(println)
     println("The number of times the URL was called (DISTINCT): " + uniq_url_rdd.count())
     avg_rdd.map(t => "Average Response Time: " + t(0)).take(1).foreach(println)
     dyno_rdd.map(t => "Most Responded Dyno: web." + t(1) + " Total Response :" + t(0) + "\n\n").take(1).foreach(println)
+
+    val pending_msgs = sqlContext.sql("SELECT count(*) FROM logs_table WHERE log_method='GET' AND log_path LIKE '/api/users/%/count_pending_messages'")
+    val pending_uniq_url_rdd = sqlContext.sql("SELECT DISTINCT(log_path) FROM logs_table WHERE log_method='GET' AND log_path LIKE '/api/users/%/count_pending_messages'")
+    val pending_avg_rdd = sqlContext.sql("SELECT AVG(log_connect+log_service) FROM logs_table WHERE log_method='GET' AND log_path LIKE '/api/users/%/count_pending_messages'")
+    val pending_dyno_rdd = sqlContext.sql("SELECT count(log_dyno) c, log_dyno FROM logs_table WHERE log_method='GET' AND log_path LIKE '/api/users/%/count_pending_messages' group by log_dyno order by c desc")
+
+
+    pending_msgs.map(t => "\nOverview for GET /api/users/{user_id}/count_pending_messages\n" +
+                            "============================================================\n\n\nTotal Number of log lines : " + t(0)).take(1).foreach(println)
+    println("The number of times the URL was called (DISTINCT): " + pending_uniq_url_rdd.count())
+    pending_avg_rdd.map(t => "Average Response Time: " + t(0)).take(1).foreach(println)
+    pending_dyno_rdd.map(t => "Most Responded Dyno: web." + t(1) + " Total Response :" + t(0) + "\n\n").take(1).foreach(println)
+
+
+    val msgs = sqlContext.sql("SELECT count(*) FROM logs_table WHERE log_method='GET' AND log_path LIKE '/api/users/%/get_messages'")
+    val msgs_uniq_url_rdd = sqlContext.sql("SELECT DISTINCT(log_path) FROM logs_table WHERE log_method='GET' AND log_path LIKE '/api/users/%/get_messages'")
+    val msgs_avg_rdd = sqlContext.sql("SELECT AVG(log_connect+log_service) FROM logs_table WHERE log_method='GET' AND log_path LIKE '/api/users/%/get_messages'")
+    val msgs_dyno_rdd = sqlContext.sql("SELECT count(log_dyno) c, log_dyno FROM logs_table WHERE log_method='GET' AND log_path LIKE '/api/users/%/get_messages' group by log_dyno order by c desc")
+
+
+    msgs.map(t => "\nOverview for GET /api/users/{user_id}/get_messages\n" +
+      "============================================================\n\n\nTotal Number of log lines : " + t(0)).take(1).foreach(println)
+    println("The number of times the URL was called (DISTINCT): " + msgs_uniq_url_rdd.count())
+    msgs_avg_rdd.map(t => "Average Response Time: " + t(0)).take(1).foreach(println)
+    msgs_dyno_rdd.map(t => "Most Responded Dyno: web." + t(1) + " Total Response :" + t(0) + "\n\n").take(1).foreach(println)
+
+
+    val friends_progress = sqlContext.sql("SELECT count(*) FROM logs_table WHERE log_method='GET' AND log_path LIKE '/api/users/%/get_friends_progress'")
+    val friends_progress_uniq_url_rdd = sqlContext.sql("SELECT DISTINCT(log_path) FROM logs_table WHERE log_method='GET' AND log_path LIKE '/api/users/%/get_friends_progress'")
+    val friends_progress_avg_rdd = sqlContext.sql("SELECT AVG(log_connect+log_service) FROM logs_table WHERE log_method='GET' AND log_path LIKE '/api/users/%/get_friends_progress'")
+    val friends_progress_rdd = sqlContext.sql("SELECT count(log_dyno) c, log_dyno FROM logs_table WHERE log_method='GET' AND log_path LIKE '/api/users/%/get_friends_progress' group by log_dyno order by c desc")
+
+
+    friends_progress.map(t => "\nOverview for GET /api/users/{user_id}/get_friends_progress\n" +
+      "============================================================\n\n\nTotal Number of log lines : " + t(0)).take(1).foreach(println)
+    println("The number of times the URL was called (DISTINCT): " + friends_progress_uniq_url_rdd.count())
+    friends_progress_avg_rdd.map(t => "Average Response Time: " + t(0)).take(1).foreach(println)
+    friends_progress_rdd.map(t => "Most Responded Dyno: web." + t(1) + " Total Response :" + t(0) + "\n\n").take(1).foreach(println)
+
+
+    val friends_score = sqlContext.sql("SELECT count(*) FROM logs_table WHERE log_method='GET' AND log_path LIKE '/api/users/%/get_friends_score'")
+    val friends_score_uniq_url_rdd = sqlContext.sql("SELECT DISTINCT(log_path) FROM logs_table WHERE log_method='GET' AND log_path LIKE '/api/users/%/get_friends_score'")
+    val friends_score_avg_rdd = sqlContext.sql("SELECT AVG(log_connect+log_service) FROM logs_table WHERE log_method='GET' AND log_path LIKE '/api/users/%/get_friends_score'")
+    val friends_score_rdd = sqlContext.sql("SELECT count(log_dyno) c, log_dyno FROM logs_table WHERE log_method='GET' AND log_path LIKE '/api/users/%/get_friends_score' group by log_dyno order by c desc")
+
+
+    friends_score.map(t => "\nOverview for GET /api/users/{user_id}/get_friends_score\n" +
+      "============================================================\n\n\nTotal Number of log lines : " + t(0)).take(1).foreach(println)
+    println("The number of times the URL was called (DISTINCT): " + friends_score_uniq_url_rdd.count())
+    friends_score_avg_rdd.map(t => "Average Response Time: " + t(0)).take(1).foreach(println)
+    friends_score_rdd.map(t => "Most Responded Dyno: web." + t(1) + " Total Response :" + t(0) + "\n\n").take(1).foreach(println)
+
+
+    val get_user = sqlContext.sql("SELECT count(*) FROM logs_table WHERE log_method='GET' AND NOT (log_path RLIKE '/.*/.*/.*/') AND log_path LIKE '/api/users/%'")
+    val get_user_uniq_url_rdd = sqlContext.sql("SELECT DISTINCT(log_path) FROM logs_table WHERE log_method='GET' AND NOT (log_path RLIKE '/.*/.*/.*/') AND log_path LIKE '/api/users/%'")
+    val get_user_score_avg_rdd = sqlContext.sql("SELECT AVG(log_connect+log_service) FROM logs_table WHERE log_method='GET' AND NOT (log_path RLIKE '/.*/.*/.*/') AND log_path LIKE '/api/users/%'")
+    val get_user_score_rdd = sqlContext.sql("SELECT count(log_dyno) c, log_dyno FROM logs_table WHERE log_method='GET' AND NOT (log_path RLIKE '/.*/.*/.*/') AND log_path LIKE '/api/users/%' group by log_dyno order by c desc")
+
+
+    get_user.map(t => "\nOverview for GET /api/users/{user_id}\n" +
+      "============================================================\n\n\nTotal Number of log lines : " + t(0)).take(1).foreach(println)
+    println("The number of times the URL was called (DISTINCT): " + get_user_uniq_url_rdd.count())
+    get_user_score_avg_rdd.map(t => "Average Response Time: " + t(0)).take(1).foreach(println)
+    get_user_score_rdd.map(t => "Most Responded Dyno: web." + t(1) + " Total Response :" + t(0) + "\n\n").take(1).foreach(println)
+
+
+    val post_user = sqlContext.sql("SELECT count(*) FROM logs_table WHERE log_method='POST' AND NOT (log_path RLIKE '/.*/.*/.*/') AND log_path LIKE '/api/users/%'")
+    val post_user_uniq_url_rdd = sqlContext.sql("SELECT DISTINCT(log_path) FROM logs_table WHERE log_method='POST' AND NOT (log_path RLIKE '/.*/.*/.*/') AND log_path LIKE '/api/users/%'")
+    val post_user_score_avg_rdd = sqlContext.sql("SELECT AVG(log_connect+log_service) FROM logs_table WHERE log_method='POST' AND NOT (log_path RLIKE '/.*/.*/.*/') AND log_path LIKE '/api/users/%'")
+    val post_user_score_rdd = sqlContext.sql("SELECT count(log_dyno) c, log_dyno FROM logs_table WHERE log_method='POST' AND NOT (log_path RLIKE '/.*/.*/.*/') AND log_path LIKE '/api/users/%' group by log_dyno order by c desc")
+
+    post_user.map(t => "\nOverview for POST /api/users/{user_id}\n" +
+      "============================================================\n\n\nTotal Number of log lines : " + t(0)).take(1).foreach(println)
+    println("The number of times the URL was called (DISTINCT): " + post_user_uniq_url_rdd.count())
+    post_user_score_avg_rdd.map(t => "Average Response Time: " + t(0)).take(1).foreach(println)
+    post_user_score_rdd.map(t => "Most Responded Dyno: web." + t(1) + " Total Response :" + t(0) + "\n\n").take(1).foreach(println)
 
   }
 
